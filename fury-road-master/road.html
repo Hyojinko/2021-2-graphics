@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fury Road</title>
+    <script type="text/javascript" src="lib/three.js"></script>
+    <script type="text/javascript" src="lib/OrbitControls.js"></script>
+    <script type="text/javascript" src="lib/HDRCubeTextureLoader.js"></script>
+    <script type="text/javascript" src="lib/OBJLoader.js"></script>
+    <script type="text/javascript" src="lib/Tween.js"></script>
+    <script type="text/javascript" src="lib/LegacyJSONLoader.js"></script>
+    <script type="text/javascript" src="lib/GLTFLoader.js"></script>
+    <script src="lib/DDSLoader.js"></script>
+    <script src="lib/MTLLoader.js"></script>
+    <script src="lib/OBJLoader.js"></script>
+    <style>
+        .msg{
+            background: #b63232;
+            color: wheat;
+            height: 50px;
+            text-align: center;
+            font-size: 50px;
+        }
+    </style>
+</head>
+<body style="background-color: #b63232">
+<div id="container">
+    <div id="massage" class="msg"></div>
+    <div id="Web_Gl"></div>
+</div>
+
+<script>
+    let camera, renderer, scene;
+    let roadMesh, truck;
+    let roadBlock = [500], block;
+    let gltfloader1, gltfloader2;
+    let group;
+    let roadBox = [500];
+    let collidableMeshList = [];
+    let box , box2 , isCollision = 1;
+    let point = 10;
+    let speed = 8;
+
+    init();
+    animate();
+
+    window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('keydown',onDocumentKeyUp,false);
+
+    function init() {
+        // create scene
+        scene = new THREE.Scene();
+
+        //create cube box mapping
+        let reflection = new THREE.CubeTextureLoader()
+            .setPath('pic/')
+            .load(['29262.jpg', 'wal29262l2.jpg', '29262.jpg', '29262.jpg', '29262.jpg', '29262.jpg']);
+        reflection.format = THREE.RGBFormat;
+        reflection.magFilter = THREE.NearestFilter ;
+        reflection.minFilter = THREE.LinearFilter ;
+        scene.background = reflection;
+
+        // create camera
+        camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 100000);
+        camera.position.set(0, 50, -200);
+        camera.lookAt(scene.position);
+
+        // create render
+        renderer = new THREE.WebGLRenderer({ antialias : true });
+        renderer.setClearColor('#fffffff');
+        renderer.setSize(window.innerWidth,window.innerHeight);
+
+        document.getElementById('Web_Gl').appendChild(renderer.domElement);
+
+        // road
+        let textureRoad = new THREE.TextureLoader().setPath('pic/').load('myRoad.png');
+
+        textureRoad.repeat.set(1, 500);
+        textureRoad.wrapS = THREE.RepeatWrapping;
+        textureRoad.wrapT = THREE.RepeatWrapping;
+        textureRoad.magFilter = THREE.NearestFilter;
+        textureRoad.minFilter = THREE.LinearFilter;
+
+        let road = new THREE.PlaneGeometry(300, 150000);
+        let roadMaterial = new THREE.MeshBasicMaterial({color: 0xcccccc, side: THREE.DoubleSide, map: textureRoad});
+        roadMesh = new THREE.Mesh(road, roadMaterial);
+        roadMesh.rotateX(Math.PI / 2);
+        roadMesh.position.y = -60;
+        roadMesh.position.z = -300;
+        scene.add(roadMesh);
+
+        // box for collision
+        let boxgeo = new THREE.BoxGeometry(50, 30, 110);
+        let boxmat = new THREE.MeshNormalMaterial({
+            opacity : 0, transparent : true
+        });
+
+        box = new THREE.Mesh(boxgeo, boxmat);
+        box.position.set(0, -10, 0);
+        scene.add(box);
+
+        // insert car 3D model
+        gltfloader1 = new THREE.GLTFLoader();
+        gltfloader1.load('model/toon_cat_free/scene.gltf', function (gltf) {
+            truck = gltf.scene;
+            console.log(truck);
+            truck.scale.set(0.05,0.05,0.05);
+            // truck.rotateX(Math.PI / 2);
+            truck.position.set(0, -30, 0);
+            scene.add(truck);
+        });
+        /*
+        let ts = -1;
+        let x = setInterval(function () {
+            ts++;
+            console.log(i);
+            if (ts === 3)
+                clearInterval(x);
+        }, 1000);
+*/
+        //create box for collision
+        boxgeo2 = new THREE.BoxGeometry(81, 40, 20);
+        box2 = new THREE.Mesh(boxgeo2, boxmat);
+
+        // create random blocks
+        group = new THREE.Group();
+        gltfloader2 = new THREE.GLTFLoader();
+        gltfloader2.load('model/road block/road block.glb', function (gltf) {
+            block = gltf.scene ;
+            block.rotateY(Math.PI / 2);
+            block.scale.set(40, 40, 40);
+
+            for( let i = 0 ; i < 200 ; i++ ) {
+                let rand = Math.floor(Math.random() * 6) + 1;
+                let j = i + 1;
+
+                roadBlock[i] = block.clone();
+                roadBox[i] = box2.clone();
+                collidableMeshList.push(roadBox[i]);
+
+                switch (rand) {
+                    case 1:
+                        roadBlock[j] = block.clone();
+                        roadBox[j] = box2.clone();
+                        collidableMeshList.push(roadBox[j]);
+                        roadBlock[i].position.set(95, -35, i * 1250);
+                        roadBlock[j].position.set(0, -35, i * 1250);
+                        roadBox[i].position.set(95, -35, i * 1250);
+                        roadBox[j].position.set(0, -35, i * 1250);
+                        group.add(roadBlock[i]);
+                        group.add(roadBlock[j]);
+                        group.add(roadBox[i]);
+                        group.add(roadBox[j]);
+                        break;
+
+                    case 2:
+                        roadBlock[j] = block.clone();
+                        roadBox[j] = box2.clone();
+                        collidableMeshList.push(roadBox[j]);
+                        roadBlock[i].position.set(0, -35, i * 1250);
+                        roadBlock[j].position.set(-95, -35, i * 1250);
+                        roadBox[i].position.set(0, -35, i * 1250);
+                        roadBox[j].position.set(-95, -35, i * 1250);
+                        group.add(roadBlock[i]);
+                        group.add(roadBlock[j]);
+                        group.add(roadBox[i]);
+                        group.add(roadBox[j]);
+                        break;
+
+                    case 3:
+                        roadBlock[j] = block.clone();
+                        roadBox[j] = box2.clone();
+                        collidableMeshList.push(roadBox[j]);
+                        roadBlock[i].position.set(95, -35, i * 1250);
+                        roadBlock[j].position.set(-95, -35, i * 1250);
+                        roadBox[i].position.set(95, -35, i * 1250);
+                        roadBox[j].position.set(-95, -35, i * 1250);
+                        group.add(roadBlock[i]);
+                        group.add(roadBlock[j]);
+                        group.add(roadBox[i]);
+                        group.add(roadBox[j]);
+                        break;
+
+                    case 4:
+                        roadBlock[i].position.set(95, -35, i * 1250);
+                        group.add(roadBlock[i]);
+                        roadBox[i].position.set(95, -35, i * 1250);
+                        group.add(roadBox[i]);
+                        break;
+
+                    case 5:
+                        roadBlock[i].position.set(0, -35, i * 1250);
+                        group.add(roadBlock[i]);
+                        roadBox[i].position.set(0, -35, i * 1250);
+                        group.add(roadBox[i]);
+                        break;
+
+                    case 6:
+                        roadBlock[i].position.set(-95, -35, i * 1250);
+                        group.add(roadBlock[i]);
+                        roadBox[i].position.set(-95, -35, i * 1250);
+                        group.add(roadBox[i]);
+                        break;
+                }
+            }
+
+            scene.add(group);
+        });
+
+        // add light
+        let ambiLight= new THREE.AmbientLight("#fffffff", 1);
+        scene.add(ambiLight);
+    }
+
+    function animate() {
+
+        update();
+
+        if (isCollision) {
+            roadMesh.position.z -= speed;
+            group.position.z -= speed;
+            point += 10;
+            let show= "POINT : " + point + " ";
+            appendText(show);
+        }
+        else {
+            let show = "******** YOUR FINAL POINT IS : " + point + " ********";
+            appendText(show);
+        }
+
+        if (point % 10000 === 0)
+            speed++;
+
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+
+    function update() {
+
+        let originPoint = box.position.clone();
+
+        for (let vertexIndex = 0; vertexIndex < box.geometry.vertices.length; vertexIndex++) {
+            let localVertex = box.geometry.vertices[vertexIndex].clone();
+            let globalVertex = localVertex.applyMatrix4(box.matrix);
+            let directionVector = globalVertex.sub(box.position);
+
+            let ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
+            let collisionResults = ray.intersectObjects(collidableMeshList);
+            if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
+                //console.log("1");
+                isCollision = 0 ;
+            }
+        }
+    }
+
+    function appendText(txt) {
+        document.getElementById('massage').innerText = txt;
+    }
+
+    function onDocumentKeyUp(event) {
+
+        if (event.keyCode === 37 ) {
+            if (camera.position.x < -90 ){
+                roadMesh.position.x = -89;
+                camera.position.x = -89 ;
+                group.position.x = -89;
+            }
+
+            camera.position.x -= 3;
+            roadMesh.position.x -= 3;
+            group.position.x -= 3;
+        }
+
+        if (event.keyCode === 39 ) {
+            if (camera.position.x > 90 ){
+                roadMesh.position.x = 89;
+                camera.position.x = 89 ;
+                group.position.x = 89 ;
+            }
+            camera.position.x += 3;
+            roadMesh.position.x += 3;
+            group.position.x += 3;
+        }
+
+    }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+</script>
+
+</body>
+</html>
