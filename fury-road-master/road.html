@@ -125,10 +125,10 @@
         // create random blocks
         group = new THREE.Group();
         gltfloader2 = new THREE.GLTFLoader();
-        gltfloader2.load('model/road block/road block.glb', function (gltf) {
+        gltfloader2.load('model/road block/trash_can.glb', function (gltf) {
             block = gltf.scene ;
-            block.rotateY(Math.PI / 2);
-            block.scale.set(40, 40, 40);
+            // block.scale.set(40, 40, 40);
+            block.scale.set(2, 2, 2);
 
             for( let i = 0 ; i < 200 ; i++ ) {
                 let rand = Math.floor(Math.random() * 6) + 1;
@@ -219,7 +219,7 @@
         if (isCollision) {
             roadMesh.position.z -= speed;
             group.position.z -= speed;
-            point += 10;
+            point += 1.0;
             let show= "POINT : " + point + " ";
             appendText(show);
         }
