@@ -245,7 +245,10 @@
 
         if (point % 10000 === 0)
             speed++;
-
+        if(point == 7777){
+            let show = "You Win!!";
+            appendText(show);
+        }
         requestAnimationFrame(animate);
         var delta = clock.getDelta()
         if (mixer) mixer.update(delta)
