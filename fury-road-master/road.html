@@ -107,7 +107,7 @@
             mixer = new THREE.AnimationMixer(gltf.scene)
             truck = gltf.scene;
             console.log(truck);
-            truck.scale.set(0.05,0.05,0.05);
+            truck.scale.set(0.1,0.1,0.1);
             // truck.rotateX(Math.PI / 2);
             truck.position.set(0, -30, 0);
             var action = mixer.clipAction(gltf.animations[0])
@@ -133,7 +133,7 @@
         gltfloader2.load('model/road block/trash_can.glb', function (gltf) {
             block = gltf.scene ;
             // block.scale.set(40, 40, 40);
-            block.scale.set(2, 2, 2);
+            block.scale.set(2.5, 2.5, 2.5);
 
             for( let i = 0 ; i < 200 ; i++ ) {
                 let rand = Math.floor(Math.random() * 6) + 1;
