@@ -31,6 +31,7 @@
 
 <script>
     let camera, renderer, scene;
+    let clock, mixer;
     let roadMesh, truck;
     let roadBlock = [500], block;
     let gltfloader1, gltfloader2;
@@ -50,6 +51,7 @@
     function init() {
         // create scene
         scene = new THREE.Scene();
+        clock = new THREE.Clock();
 
         //create cube box mapping
         let reflection = new THREE.CubeTextureLoader()
@@ -102,12 +104,15 @@
         // insert car 3D model
         gltfloader1 = new THREE.GLTFLoader();
         gltfloader1.load('model/toon_cat_free/scene.gltf', function (gltf) {
+            mixer = new THREE.AnimationMixer(gltf.scene)
             truck = gltf.scene;
             console.log(truck);
             truck.scale.set(0.05,0.05,0.05);
             // truck.rotateX(Math.PI / 2);
             truck.position.set(0, -30, 0);
+            var action = mixer.clipAction(gltf.animations[0])
             scene.add(truck);
+            action.play()   
         });
         /*
         let ts = -1;
@@ -232,6 +237,8 @@
             speed++;
 
         requestAnimationFrame(animate);
+        var delta = clock.getDelta()
+        if (mixer) mixer.update(delta)
         renderer.render(scene, camera);
     }
 
