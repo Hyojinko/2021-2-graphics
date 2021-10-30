@@ -10,6 +10,7 @@
     <script type="text/javascript" src="lib/Tween.js"></script>
     <script type="text/javascript" src="lib/LegacyJSONLoader.js"></script>
     <script type="text/javascript" src="lib/GLTFLoader.js"></script>
+    <audio src="sound/meow.wav" preload="auto" id="explode_sound"></audio>
     <script src="lib/DDSLoader.js"></script>
     <script src="lib/MTLLoader.js"></script>
     <script src="lib/OBJLoader.js"></script>
@@ -41,6 +42,7 @@
     let box , box2 , isCollision = 1;
     let point = 10;
     let speed = 8;
+    let isSound = 0;
 
     init();
     animate();
@@ -261,6 +263,10 @@
             if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
                 //console.log("1");
                 isCollision = 0 ;
+                if (!isSound){
+                    document.getElementById('explode_sound').play()
+                    isSound = 1;
+                }
             }
         }
     }
