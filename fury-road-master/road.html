@@ -46,6 +46,8 @@
     let point = 10;
     let speed = 8;
     let isSound = 0;
+    var cameraSwitcher = "camera"
+    Math.radians = function(degrees){return degrees * Math.PI/180;};
 
     init();
     animate();
@@ -71,6 +73,10 @@
         camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 100000);
         camera.position.set(0, 50, -200);
         camera.lookAt(scene.position);
+
+        camera2 = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 100000);
+        camera2.position.set(400, 100, 0);
+        camera2.rotateY(Math.radians(90));
 
         // create render
         renderer = new THREE.WebGLRenderer({ antialias : true });
@@ -253,7 +259,12 @@
         requestAnimationFrame(animate);
         var delta = clock.getDelta()
         if (mixer) mixer.update(delta)
-        renderer.render(scene, camera);
+        if(cameraSwitcher == "camera"){
+            renderer.render(scene, camera);
+        }
+        if(cameraSwitcher == "camera2"){
+            renderer.render(scene, camera2);
+        }
     }
 
     function update() {
@@ -316,6 +327,13 @@
             camera.position.x += 3;
             roadMesh.position.x += 3;
             group.position.x += 3;
+        }
+
+        if(event.keyCode === 50) {
+            cameraSwitcher = "camera2"
+        }
+        if(event.keyCode === 49) {
+            cameraSwitcher = "camera"
         }
 
     }
