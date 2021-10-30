@@ -42,7 +42,7 @@
     let group;
     let roadBox = [500];
     let collidableMeshList = [];
-    let box , box2 , isCollision = 1;
+    let box , box2 , state = 1;     //isCollision -> state (0: END / 1: ING / 2: WIN)
     let point = 10;
     let speed = 8;
     let isSound = 0;
@@ -231,24 +231,25 @@
 
         update();
 
-        if (isCollision) {
+        if (state == 1) {
             roadMesh.position.z -= speed;
             group.position.z -= speed;
             point += 1.0;
             let show= "POINT : " + point + " ";
             appendText(show);
         }
-        else {
+        else if (state == 0) {
             let show = "Final Score:" + point ;
+            appendText(show);
+        }
+        else if (state == 2) {
+            let show = "You Win!!!";
             appendText(show);
         }
 
         if (point % 10000 === 0)
             speed++;
-        if(point == 7777){
-            let show = "You Win!!";
-            appendText(show);
-        }
+      
         requestAnimationFrame(animate);
         var delta = clock.getDelta()
         if (mixer) mixer.update(delta)
@@ -268,11 +269,14 @@
             let collisionResults = ray.intersectObjects(collidableMeshList);
             if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
                 //console.log("1");
-                isCollision = 0 ;
+                state = 0 ;
                 if (!isSound){
                     document.getElementById('explode_sound').play()
                     isSound = 1;
                 }
+            }
+            if (point >= 7777){
+                state = 2;
             }
         }
     }
