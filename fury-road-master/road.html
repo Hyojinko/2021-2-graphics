@@ -78,6 +78,10 @@
         camera2.position.set(400, 100, 0);
         camera2.rotateY(Math.radians(90));
 
+        collisionCamera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 100000);
+        collisionCamera.position.set(150, 50, 100);
+        collisionCamera.rotateY(Math.radians(90)); 
+
         // create render
         renderer = new THREE.WebGLRenderer({ antialias : true });
         renderer.setClearColor('#fffffff');
@@ -246,6 +250,7 @@
         }
         else if (state == 0) {
             let show = "Final Score:" + point ;
+            cameraSwitcher="collisionCamera"
             appendText(show);
         }
         else if (state == 2) {
@@ -265,6 +270,11 @@
         if(cameraSwitcher == "camera2"){
             renderer.render(scene, camera2);
         }
+        if(cameraSwitcher == "collisionCamera"){
+            renderer.render(scene, collisionCamera);
+        }
+        
+        
     }
 
     function update() {
